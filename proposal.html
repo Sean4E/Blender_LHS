@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        // Auth guard — redirect to landing if not authenticated
+        (function(){
+            const HASH = '0f513ee619dc567fce7d6cde782d2d0be89b068c02d01f17950b6faef8f1711f';
+            if (sessionStorage.getItem('lhs_auth') !== HASH) {
+                window.location.replace('index.html');
+            }
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blender for Animation Production — Lighthouse Studios × 4E</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:       #06060a;
+            --bg2:      #0c0c14;
+            --gold:     #F0A820;
+            --gold-s:   rgba(240,168,32,0.10);
+            --gold-e:   rgba(240,168,32,0.25);
+            --rose:     #E04068;
+            --sky:      #38A0DC;
+            --mint:     #30C8A0;
+            --violet:   #9870E8;
+            --amber:    #E87820;
+            --text:     #EAE5DC;
+            --sub:      #7C786F;
+            --faint:    rgba(255,255,255,0.04);
+            --fborder:  rgba(255,255,255,0.08);
+            --r:        16px;
+        }
+
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+        body {
+            font-family:'DM Sans',sans-serif;
+            background:var(--bg); color:var(--text);
+            overflow-x:hidden; line-height:1.7;
+        }
+
+        /* ── ATMOSPHERE ── */
+        .atmo { position:fixed; inset:0; z-index:0; pointer-events:none; }
+        .ao {
+            position:absolute; border-radius:50%; filter:blur(110px);
+        }
+        .ao1 {
+            width:55vw; height:55vw; top:-15%; left:-10%;
+            background:radial-gradient(circle,rgba(240,168,32,.06),transparent 65%);
+            animation:adrift 22s ease-in-out infinite;
+        }
+        .ao2 {
+            width:45vw; height:45vw; bottom:-10%; right:-8%;
+            background:radial-gradient(circle,rgba(56,160,220,.05),transparent 65%);
+            animation:adrift 30s ease-in-out infinite reverse;
+        }
+        .ao3 {
+            width:30vw; height:30vw; top:45%; left:42%;
+            background:radial-gradient(circle,rgba(48,200,160,.04),transparent 65%);
+            animation:adrift 18s ease-in-out infinite 6s;
+        }
+        @keyframes adrift {
+            0%,100%{transform:translate(0,0) scale(1)}
+            40%{transform:translate(30px,-25px) scale(1.07)}
+            70%{transform:translate(-20px,28px) scale(.95)}
+        }
+        .grain {
+            position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.02;
+            background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size:180px;
+        }
+
+        /* ── LAYOUT ── */
+        .wrap {
+            position:relative; z-index:1;
+            max-width:1160px; margin:0 auto; padding:44px 24px;
+        }
+        .glass {
+            background:var(--faint); border:1px solid var(--fborder);
+            border-radius:var(--r); backdrop-filter:blur(12px);
+        }
+
+        /* ── HEADER ── */
+        .header {
+            padding:60px 60px 52px; margin-bottom:24px;
+            position:relative; overflow:hidden;
+        }
+        .header::before {
+            content:''; position:absolute; top:0; left:0; right:0; height:2px;
+            background:linear-gradient(90deg,transparent 0%,var(--gold) 18%,var(--rose) 38%,var(--mint) 58%,var(--sky) 78%,transparent 100%);
+        }
+        /* Meadow silhouette */
+        .meadow-svg {
+            position:absolute; bottom:0; right:0; width:320px; height:180px;
+            opacity:.055; pointer-events:none;
+        }
+
+        .logo-row {
+            display:flex; align-items:center; gap:16px; margin-bottom:40px; flex-wrap:wrap;
+        }
+        .lbox {
+            display:flex; align-items:center; gap:9px;
+            background:var(--gold-s); border:1px solid var(--gold-e);
+            border-radius:12px; padding:11px 18px; transition:background .3s;
+        }
+        .lbox:hover { background:rgba(240,168,32,.18); }
+        .lbox img { height:36px; width:auto; max-width:120px; object-fit:contain; }
+        .lbox .ltext {
+            font-family:'Syne',sans-serif; font-weight:800;
+            font-size:.9em; color:var(--gold); display:none;
+        }
+        .lsep { width:4px; height:4px; border-radius:50%; background:rgba(255,255,255,.18); }
+
+        .vbadge {
+            display:inline-flex; align-items:center; gap:7px;
+            background:rgba(240,168,32,.08); border:1px solid var(--gold-e);
+            padding:4px 12px; border-radius:20px; margin-bottom:16px; width:fit-content;
+            font-family:'Syne',sans-serif; font-size:.66em; font-weight:700;
+            letter-spacing:2.5px; text-transform:uppercase; color:var(--gold);
+        }
+        .vbadge::before { content:'●'; animation:blink 2s infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+        .hkicker {
+            font-family:'Syne',sans-serif; font-weight:700; font-size:.7em;
+            letter-spacing:3px; text-transform:uppercase; color:var(--sub); margin-bottom:12px;
+        }
+        .header h1 {
+            font-family:'DM Serif Display',serif; font-weight:400;
+            font-size:3.6em; line-height:1.05; margin-bottom:18px; color:var(--text);
+        }
+        .header h1 em { font-style:italic; color:var(--gold); }
+        .header .hsub {
+            font-size:1.05em; font-weight:300; color:var(--sub); max-width:580px; line-height:1.8;
+        }
+
+        /* ── INTRO ── */
+        .intro {
+            padding:32px 44px; margin-bottom:24px;
+            font-size:1.05em; line-height:1.9; color:#bab6ae;
+            border-left:3px solid var(--gold); border-radius:0 var(--r) var(--r) 0;
+            background:linear-gradient(90deg,rgba(240,168,32,.06),var(--faint));
+        }
+        .intro strong { color:var(--text); font-weight:500; }
+
+        /* ── STATS ── */
+        .stats {
+            display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:24px;
+        }
+        .sc {
+            padding:28px 16px; text-align:center; cursor:pointer; transition:all .3s;
+            position:relative; overflow:hidden;
+        }
+        .sc::after {
+            content:''; position:absolute; bottom:0; left:0; right:0; height:2px;
+            background:var(--gold); transform:scaleX(0); transition:transform .3s;
+        }
+        .sc:hover::after { transform:scaleX(1); }
+        .sc:hover { transform:translateY(-5px); background:rgba(240,168,32,.07); }
+        .sn { font-family:'DM Serif Display',serif; font-size:3.2em; color:var(--gold); line-height:1; margin-bottom:7px; }
+        .sl { font-family:'Syne',sans-serif; font-size:.64em; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--sub); }
+
+        /* ── BLOCKOUT ── */
+        .blockout {
+            padding:48px 56px; margin-bottom:24px; position:relative; overflow:hidden;
+        }
+        .blockout::before {
+            content:''; position:absolute; inset:0;
+            background:linear-gradient(135deg,rgba(240,168,32,.06) 0%,rgba(48,200,160,.04) 60%,transparent 100%);
+        }
+        .bolabel {
+            font-family:'Syne',sans-serif; font-weight:700; font-size:.68em;
+            letter-spacing:3px; text-transform:uppercase; color:var(--mint); margin-bottom:12px; position:relative;
+        }
+        .blockout h2 {
+            font-family:'DM Serif Display',serif; font-weight:400; font-size:2.2em;
+            color:var(--text); margin-bottom:14px; position:relative;
+        }
+        .blockout h2 em { color:var(--mint); font-style:italic; }
+        .blockout > p {
+            color:#9c988f; font-size:.98em; max-width:660px; line-height:1.85; margin-bottom:28px; position:relative;
+        }
+        .bo4 {
+            display:grid; grid-template-columns:repeat(4,1fr); gap:10px; position:relative;
+        }
+        .bostage {
+            background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07);
+            border-radius:14px; padding:20px 16px; text-align:center;
+            transition:all .3s; position:relative;
+        }
+        .bostage:not(:last-child)::after {
+            content:'→'; position:absolute; right:-8px; top:50%; transform:translateY(-50%);
+            color:var(--sub); font-size:.85em; z-index:1;
+        }
+        .bostage:hover { background:rgba(240,168,32,.07); border-color:var(--gold-e); transform:translateY(-3px); }
+        .bostage .bi { font-size:1.8em; margin-bottom:9px; display:block; }
+        .bostage h4 {
+            font-family:'Syne',sans-serif; font-weight:700; font-size:.76em;
+            color:var(--text); margin-bottom:5px;
+        }
+        .bostage p { font-size:.73em; color:var(--sub); line-height:1.5; }
+        .bostage.bs1 { border-top:2px solid rgba(240,168,32,.5); }
+        .bostage.bs2 { border-top:2px solid rgba(224,64,104,.5); }
+        .bostage.bs3 { border-top:2px solid rgba(152,112,232,.5); }
+        .bostage.bs4 { border-top:2px solid rgba(48,200,160,.5); }
+
+        /* ── SECTION ── */
+        .section { margin-bottom:24px; }
+        .stitle {
+            font-family:'DM Serif Display',serif; font-weight:400;
+            font-size:1.85em; color:var(--text); padding:32px 44px 0; margin-bottom:24px;
+        }
+        .stitle::after {
+            content:''; display:block; width:40px; height:3px;
+            background:var(--gold); border-radius:2px; margin-top:12px;
+        }
+
+        /* ── WEEK CARDS ── */
+        .wklist { padding:0 36px 36px; display:flex; flex-direction:column; gap:12px; }
+
+        .wk {
+            display:grid; grid-template-columns:76px 1fr;
+            cursor:pointer; transition:transform .3s; border-radius:var(--r); overflow:hidden;
+        }
+        .wk:hover { transform:translateX(5px); }
+        .wk:hover .wkn { background:var(--gold); }
+
+        .wkn {
+            background:var(--gold-s); border:1px solid var(--gold-e);
+            border-right:none; border-radius:var(--r) 0 0 var(--r);
+            display:flex; flex-direction:column;
+            align-items:center; justify-content:center;
+            padding:20px 8px; transition:all .3s; gap:2px;
+        }
+        .wkn .wl {
+            font-family:'Syne',sans-serif; font-weight:700;
+            font-size:.55em; letter-spacing:2px; text-transform:uppercase;
+            color:var(--gold); transition:color .3s;
+        }
+        .wkn .wnum {
+            font-family:'DM Serif Display',serif; font-size:2.6em;
+            color:var(--gold); line-height:1; transition:color .3s;
+        }
+        .wk:hover .wkn .wl,
+        .wk:hover .wkn .wnum { color:var(--bg); }
+
+        .wkb {
+            background:var(--faint); border:1px solid var(--fborder);
+            border-left:none; border-radius:0 var(--r) var(--r) 0;
+            padding:24px 32px;
+        }
+        .wkb h3 {
+            font-family:'Syne',sans-serif; font-weight:700; font-size:.98em;
+            color:var(--text); margin-bottom:4px;
+        }
+        .wktheme {
+            font-size:.78em; color:var(--gold); font-family:'Syne',sans-serif;
+            font-weight:600; margin-bottom:12px;
+        }
+        .wkmile {
+            font-size:.8em; color:var(--mint); font-style:italic;
+            padding:8px 13px; background:rgba(48,200,160,.07);
+            border-left:2px solid var(--mint); border-radius:0 8px 8px 0;
+            margin-bottom:14px; line-height:1.55;
+        }
+
+        /* Topic grid — clean 2-column, no stretching */
+        .wtopics {
+            display:grid; grid-template-columns:repeat(2,1fr); gap:4px 16px;
+            margin-top:10px;
+        }
+        .wtopic {
+            font-size:.8em; color:#8a8680;
+            padding:5px 0; border-bottom:1px solid rgba(255,255,255,.04);
+            display:flex; align-items:baseline; gap:7px; line-height:1.45;
+            transition:color .2s;
+        }
+        .wk:hover .wtopic { color:#a8a39c; }
+        .wtopic::before {
+            content:'—'; font-size:.8em; flex-shrink:0;
+        }
+        .wk:nth-child(1) .wtopic::before { color:var(--gold); }
+        .wk:nth-child(2) .wtopic::before { color:var(--rose); }
+        .wk:nth-child(3) .wtopic::before { color:var(--violet); }
+        .wk:nth-child(4) .wtopic::before { color:var(--mint); }
+
+        /* ── 2-COL CARDS ── */
+        .cgrid {
+            display:grid; grid-template-columns:repeat(2,1fr); gap:16px;
+            padding:0 36px 36px;
+        }
+        .card {
+            padding:28px; cursor:pointer; transition:all .3s;
+            border-left:2px solid transparent; position:relative;
+        }
+        .card:hover { background:rgba(240,168,32,.05); border-left-color:var(--gold); transform:translateX(5px); }
+        .card h3 {
+            font-family:'Syne',sans-serif; font-weight:700; font-size:.95em;
+            color:var(--text); margin-bottom:14px;
+        }
+        .card ul { list-style:none; }
+        .card li {
+            padding:7px 0; color:#928e87; font-size:.88em; line-height:1.6;
+            border-bottom:1px solid rgba(255,255,255,.04);
+            display:flex; align-items:flex-start; gap:9px; transition:color .2s;
+        }
+        .card li:last-child { border-bottom:none; }
+        .card li:hover { color:var(--text); }
+        .card li::before { content:'→'; color:var(--gold); flex-shrink:0; margin-top:1px; font-size:.85em; }
+
+        /* ── OUTCOMES ── */
+        .ogrid {
+            display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
+            padding:0 36px 36px;
+        }
+        .oitem {
+            padding:20px; display:flex; align-items:flex-start; gap:12px;
+            cursor:pointer; transition:all .3s;
+        }
+        .oitem:hover { background:rgba(240,168,32,.06); transform:scale(1.02); }
+        .odot {
+            width:8px; height:8px; border-radius:50%; background:var(--gold);
+            flex-shrink:0; margin-top:7px;
+            box-shadow:0 0 10px rgba(240,168,32,.7);
+            animation:glow 3s ease-in-out infinite;
+        }
+        @keyframes glow { 0%,100%{box-shadow:0 0 8px rgba(240,168,32,.5)} 50%{box-shadow:0 0 18px rgba(240,168,32,1)} }
+        .otext { font-size:.88em; color:#aca79f; line-height:1.65; }
+        .otext strong { color:var(--text); font-weight:500; }
+
+        /* ── DELIVERY PILLS ── */
+        .dpills { display:flex; flex-wrap:wrap; gap:10px; padding:0 36px 36px; }
+        .dpill {
+            display:flex; align-items:center; gap:10px;
+            padding:12px 18px; border-radius:40px; cursor:pointer;
+            background:var(--faint); border:1px solid var(--fborder);
+            transition:all .3s; font-size:.88em; color:#a0988f; max-width:100%;
+        }
+        .dpill:hover { background:rgba(240,168,32,.08); border-color:var(--gold-e); color:var(--text); }
+        .dpill .di { font-size:1.1em; flex-shrink:0; }
+        .dpill strong { color:var(--text); font-weight:500; }
+
+        /* ── BEYOND BASICS ── */
+        .beyond {
+            padding:48px 56px; margin-bottom:24px; position:relative; overflow:hidden;
+        }
+        .beyond::before {
+            content:''; position:absolute; inset:0;
+            background:linear-gradient(135deg,rgba(152,112,232,.06),rgba(224,64,104,.04),rgba(240,168,32,.04));
+        }
+        .beyondlabel {
+            font-family:'Syne',sans-serif; font-weight:700; font-size:.68em;
+            letter-spacing:3px; text-transform:uppercase; color:var(--violet);
+            margin-bottom:12px; position:relative;
+        }
+        .beyond h2 {
+            font-family:'DM Serif Display',serif; font-weight:400; font-size:2em;
+            color:var(--text); margin-bottom:12px; position:relative;
+        }
+        .beyond > p {
+            color:#9a968e; font-size:.96em; max-width:620px; line-height:1.8; margin-bottom:28px; position:relative;
+        }
+        .bgrid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; position:relative; }
+        .bc {
+            background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07);
+            border-radius:14px; padding:24px 22px; transition:all .3s;
+        }
+        .bc:hover { transform:translateY(-4px); background:rgba(255,255,255,.06); }
+        .bc-ico { font-size:1.7em; margin-bottom:11px; }
+        .bc h4 {
+            font-family:'Syne',sans-serif; font-weight:700; font-size:.9em;
+            color:var(--text); margin-bottom:8px;
+        }
+        .bc p { font-size:.84em; color:#787370; line-height:1.7; }
+        .bc:nth-child(1) { border-top:2px solid rgba(152,112,232,.45); }
+        .bc:nth-child(2) { border-top:2px solid rgba(232,120,32,.45); }
+        .bc:nth-child(3) { border-top:2px solid rgba(224,64,104,.45); }
+        .bc:nth-child(4) { border-top:2px solid rgba(48,200,160,.45); }
+
+        /* ── PARTNERSHIP ── */
+        .partnership {
+            padding:48px 56px; margin-bottom:24px; position:relative; overflow:hidden;
+        }
+        .partnership::before {
+            content:''; position:absolute; inset:0;
+            background:linear-gradient(135deg,rgba(48,200,160,.06),rgba(240,168,32,.04));
+        }
+        .plabel {
+            font-family:'Syne',sans-serif; font-weight:700; font-size:.68em;
+            letter-spacing:3px; text-transform:uppercase; color:var(--mint);
+            margin-bottom:12px; position:relative;
+        }
+        .partnership h2 {
+            font-family:'DM Serif Display',serif; font-weight:400; font-size:2em;
+            color:var(--text); margin-bottom:12px; position:relative;
+        }
+        .partnership > p {
+            color:#9a968e; font-size:.96em; max-width:640px; line-height:1.8; margin-bottom:28px; position:relative;
+        }
+        .p3 { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; position:relative; }
+        .pc {
+            background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07);
+            border-radius:14px; padding:26px 22px; transition:all .3s;
+        }
+        .pc:hover { transform:translateY(-4px); background:rgba(255,255,255,.06); }
+        .pcn { font-family:'DM Serif Display',serif; font-size:2.6em; line-height:1; margin-bottom:12px; }
+        .pc:nth-child(1) .pcn { color:var(--gold); }
+        .pc:nth-child(2) .pcn { color:var(--rose); }
+        .pc:nth-child(3) .pcn { color:var(--mint); }
+        .pc h4 {
+            font-family:'Syne',sans-serif; font-weight:700; font-size:.9em;
+            color:var(--text); margin-bottom:9px;
+        }
+        .pc p { font-size:.84em; color:#787370; line-height:1.7; }
+        .pc .ptag {
+            display:inline-block; margin-top:12px; font-size:.7em; font-family:'Syne',sans-serif;
+            font-weight:700; letter-spacing:1px; padding:3px 10px; border-radius:10px;
+        }
+        .pc:nth-child(1) .ptag { background:rgba(240,168,32,.1); color:var(--gold); border:1px solid rgba(240,168,32,.25); }
+        .pc:nth-child(2) .ptag { background:rgba(224,64,104,.1); color:var(--rose); border:1px solid rgba(224,64,104,.25); }
+        .pc:nth-child(3) .ptag { background:rgba(48,200,160,.1); color:var(--mint); border:1px solid rgba(48,200,160,.25); }
+
+        /* ── FOOTER ── */
+        .footer {
+            padding:36px 44px;
+            display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;
+            border-top:1px solid rgba(255,255,255,.06);
+        }
+        .ftext { font-family:'Syne',sans-serif; font-size:.85em; color:var(--sub); line-height:1.7; }
+        .ftext strong { color:var(--gold); font-weight:700; }
+        .flogos { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+        .flogos .lbox { padding:8px 14px; }
+        .flogos .lbox img { height:28px; }
+
+        /* ── SCROLL INDICATOR ── */
+        .scind {
+            position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+            z-index:10; opacity:.5; transition:opacity .5s; animation:sbounce 2.5s infinite;
+        }
+        .sca {
+            width:24px; height:40px; border:1px solid rgba(240,168,32,.35);
+            border-radius:16px; position:relative;
+        }
+        .sca::before {
+            content:''; position:absolute; top:7px; left:50%;
+            transform:translateX(-50%); width:4px; height:4px;
+            background:var(--gold); border-radius:50%;
+            animation:sdot 2.5s infinite;
+        }
+        @keyframes sbounce { 0%,100%{transform:translateX(-50%)} 50%{transform:translateX(-50%) translateY(-7px)} }
+        @keyframes sdot {
+            0%{transform:translateX(-50%);opacity:0}
+            40%{opacity:1}
+            80%{transform:translateX(-50%) translateY(15px);opacity:0}
+            100%{opacity:0}
+        }
+
+        /* ── RESPONSIVE ── */
+        @media(max-width:900px){
+            .stats{grid-template-columns:repeat(3,1fr)}
+            .bo4{grid-template-columns:1fr 1fr}
+            .bostage:not(:last-child)::after{display:none}
+            .cgrid,.ogrid,.p3,.bgrid{grid-template-columns:1fr}
+            .header,.blockout,.beyond,.partnership{padding:36px 28px}
+            .header h1{font-size:2.5em}
+            .wtopics{grid-template-columns:1fr}
+        }
+        @media(max-width:600px){
+            .stats{grid-template-columns:1fr 1fr}
+            .ogrid{grid-template-columns:1fr}
+            .header h1{font-size:2em}
+            .stitle{padding:24px 18px 0}
+            .wklist,.cgrid,.ogrid,.dpills{padding-left:14px;padding-right:14px}
+            .bo4{grid-template-columns:1fr}
+            .bostage:not(:last-child)::after{display:none}
+        }
+
+        /* ── MODALS ── */
+        .mo {
+            position:fixed; inset:0; background:rgba(6,6,10,.93);
+            backdrop-filter:blur(14px); z-index:2000;
+            display:none; align-items:center; justify-content:center;
+            padding:20px; animation:mfade .25s ease;
+        }
+        .mo.open{display:flex}
+        @keyframes mfade{from{opacity:0}to{opacity:1}}
+        .m {
+            background:#0a0a10; border:1px solid rgba(240,168,32,.2);
+            border-radius:20px; max-width:760px; width:100%;
+            max-height:88vh; overflow-y:auto; padding:46px;
+            position:relative;
+            box-shadow:0 0 80px rgba(240,168,32,.06),0 20px 60px rgba(0,0,0,.7);
+            animation:mup .32s ease;
+        }
+        @keyframes mup{from{opacity:0;transform:translateY(36px) scale(.96)}to{opacity:1;transform:none}}
+        .mcl {
+            position:absolute; top:16px; right:16px;
+            width:34px; height:34px; border:1px solid rgba(240,168,32,.25);
+            background:rgba(240,168,32,.1); border-radius:50%;
+            color:var(--gold); font-size:19px; cursor:pointer;
+            display:flex; align-items:center; justify-content:center; transition:all .2s;
+        }
+        .mcl:hover{background:var(--gold);color:var(--bg);transform:rotate(90deg)}
+        .mh { margin-bottom:26px; padding-bottom:20px; border-bottom:1px solid rgba(240,168,32,.18); }
+        .mk { font-family:'Syne',sans-serif; font-weight:700; font-size:.65em; letter-spacing:3px; text-transform:uppercase; color:var(--gold); margin-bottom:7px; }
+        .mt { font-family:'DM Serif Display',serif; font-weight:400; font-size:1.9em; color:var(--text); }
+        .mc { color:#aca89f; line-height:1.8; }
+        .ms {
+            margin:22px 0; padding:20px; background:rgba(255,255,255,.03);
+            border-radius:11px; border:1px solid rgba(240,168,32,.1);
+        }
+        .ms h3 { font-family:'Syne',sans-serif; font-weight:700; font-size:.78em; letter-spacing:1px; text-transform:uppercase; color:var(--gold); margin-bottom:11px; }
+        .ms p,.ms li { font-size:.91em; color:#9e9890; line-height:1.8; margin-bottom:7px; }
+        .ms ul { list-style:none; }
+        .ms li::before { content:'✓  '; color:var(--gold); font-weight:bold; }
+        .fb {
+            background:rgba(240,168,32,.07); border-left:3px solid var(--gold);
+            border-radius:0 9px 9px 0; padding:14px 18px; margin:10px 0;
+        }
+        .fb strong { display:block; color:var(--text); font-family:'Syne',sans-serif; font-weight:700; font-size:.86em; margin-bottom:4px; }
+        .fb p { font-size:.86em; color:#928c83; line-height:1.7; }
+        .mnote {
+            display:inline-block; margin-top:7px; padding:5px 12px; border-radius:7px;
+            font-size:.77em; background:rgba(48,200,160,.08); border-left:2px solid var(--mint);
+            color:var(--mint); line-height:1.5;
+        }
+    </style>
+</head>
+<body>
+
+<div class="atmo">
+    <div class="ao ao1"></div>
+    <div class="ao ao2"></div>
+    <div class="ao ao3"></div>
+</div>
+<div class="grain"></div>
+
+<div class="wrap">
+
+    <!-- HEADER -->
+    <div class="glass header">
+        <svg class="meadow-svg" viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 165 Q80 120 160 158 Q240 118 320 162" stroke="white" stroke-width="1.2" fill="none" opacity=".5"/>
+            <rect x="138" y="96" width="44" height="69" rx="3" fill="white" opacity=".45"/>
+            <polygon points="118,96 160,52 202,96" fill="white" opacity=".55"/>
+            <rect x="150" y="133" width="20" height="32" fill="white" opacity=".35"/>
+            <rect x="178" y="60" width="9" height="18" fill="white" opacity=".35"/>
+            <ellipse cx="72" cy="140" rx="16" ry="7" fill="white" opacity=".45"/>
+            <rect x="69" y="140" width="6" height="14" fill="white" opacity=".35"/>
+            <ellipse cx="268" cy="145" rx="13" ry="6" fill="white" opacity=".38"/>
+            <rect x="265" y="145" width="5" height="12" fill="white" opacity=".3"/>
+            <circle cx="48" cy="150" r="4" fill="white" opacity=".45"/>
+            <circle cx="38" cy="145" r="3" fill="white" opacity=".35"/>
+            <circle cx="55" cy="143" r="3" fill="white" opacity=".4"/>
+            <circle cx="288" cy="152" r="3" fill="white" opacity=".38"/>
+            <circle cx="298" cy="147" r="4" fill="white" opacity=".42"/>
+            <ellipse cx="160" cy="174" rx="190" ry="30" fill="white" opacity=".12"/>
+        </svg>
+
+        <div class="logo-row">
+            <div class="lbox">
+                <img src="LHS.png" alt="Lighthouse Studios" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                <span class="ltext">Lighthouse Studios</span>
+            </div>
+            <div class="lsep"></div>
+            <div class="lbox">
+                <img src="4e.png" alt="4E Virtual Design" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                <span class="ltext">4E Virtual Design</span>
+            </div>
+            <div class="lsep"></div>
+            <div class="lbox">
+                <img src="Blender_Icon.png" alt="Blender" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                <span class="ltext">Blender</span>
+            </div>
+        </div>
+
+        <div class="vbadge">Training Proposal · 2026</div>
+        <div class="hkicker">Lighthouse Studios × 4E Virtual Design</div>
+        <h1>Blender for<br><em>Animation Production</em></h1>
+        <div class="hsub">A four-week programme built around a single shared scene — from rough block-out to a fully animated, compositing-ready output that slots directly into the LHS pipeline.</div>
+    </div>
+
+    <!-- INTRO -->
+    <div class="glass intro">
+        Designed around <strong>Lighthouse Studios' existing workflow</strong> — Toon Boom Harmony, After Effects, and the production values your crew already applies every day. Blender is introduced as a complementary tool: for environment blocking, 3D layout, stylised Grease Pencil output, and procedural animation that feeds back into your pipeline. The shared project — a wildflower meadow, a cottage on a hill, a rigged flower and mushroom — is built from scratch across four weeks, advancing the same scene file every session until it is complete, animated, and ready for compositing.
+    </div>
+
+    <!-- STATS -->
+    <div class="stats">
+        <div class="glass sc" onclick="om('weeks')">
+            <div class="sn">4</div><div class="sl">Weeks</div>
+        </div>
+        <div class="glass sc" onclick="om('sessions')">
+            <div class="sn">8</div><div class="sl">Sessions</div>
+        </div>
+        <div class="glass sc" onclick="om('consult')">
+            <div class="sn">1:1</div><div class="sl">Consultations</div>
+        </div>
+        <div class="glass sc" onclick="om('format')">
+            <div class="sn">2h</div><div class="sl">Per Session</div>
+        </div>
+        <div class="glass sc" onclick="om('mode')">
+            <div class="sn">●</div><div class="sl">Online / On-Site</div>
+        </div>
+    </div>
+
+    <!-- BLOCK OUT PHILOSOPHY -->
+    <div class="glass blockout">
+        <div class="bolabel">Core Methodology</div>
+        <h2>Block Out First.<br><em>Then Build.</em></h2>
+        <p>Every session opens with the complete scene already visible as a rough block-out — established in the very first session. This mirrors real production thinking: composition, scale, and spatial logic are resolved before a single detail is added. Each week, the rough version is refined into the finished result. The destination is always in sight.</p>
+        <div class="bo4">
+            <div class="bostage bs1">
+                <span class="bi">🧱</span>
+                <h4>Week 1 — Block-Out</h4>
+                <p>Every element placed in rough form. Scale, space and composition resolved on day one.</p>
+            </div>
+            <div class="bostage bs2">
+                <span class="bi">🏡</span>
+                <h4>Week 2 — Modelling</h4>
+                <p>Flower (circular array), mushroom, cottage, environment. Clean production geometry.</p>
+            </div>
+            <div class="bostage bs3">
+                <span class="bi">🦴</span>
+                <h4>Week 3 — Rig + Materials</h4>
+                <p>Rigs, F-curve modifiers, audio animation. Toon shading. Grease Pencil 2D output.</p>
+            </div>
+            <div class="bostage bs4">
+                <span class="bi">🎬</span>
+                <h4>Week 4 — Camera + Output</h4>
+                <p>Camera path, animation finalisation, render passes. Ready for AE and Toon Boom.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROGRAMME STRUCTURE -->
+    <div class="glass section">
+        <h2 class="stitle">Programme Structure</h2>
+        <div class="wklist">
+
+            <!-- WEEK 1 -->
+            <div class="wk" onclick="om('w1')">
+                <div class="wkn"><div class="wl">Week</div><div class="wnum">1</div></div>
+                <div class="wkb">
+                    <h3>Foundations, Navigation &amp; Full Scene Block-Out</h3>
+                    <div class="wktheme">Getting into 3D — and building the whole world on day one</div>
+                    <div class="wkmile">🧱 Milestone: Complete rough block-out of the entire scene — cottage, hill, meadow, flower, mushroom, camera. Scale, space and composition resolved. No detail yet.</div>
+                    <div class="wtopics">
+                        <span class="wtopic">Interface layout &amp; customisation</span>
+                        <span class="wtopic">Viewport navigation</span>
+                        <span class="wtopic">Object manipulation — G R S</span>
+                        <span class="wtopic">Primitives &amp; Edit mode basics</span>
+                        <span class="wtopic">Mirror, Array, Solidify modifiers</span>
+                        <span class="wtopic">Scene Collections &amp; naming</span>
+                        <span class="wtopic">Block-out methodology</span>
+                        <span class="wtopic">Working to spec</span>
+                        <span class="wtopic">Client reference import</span>
+                        <span class="wtopic">Grease Pencil introduction</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WEEK 2 -->
+            <div class="wk" onclick="om('w2')">
+                <div class="wkn"><div class="wl">Week</div><div class="wnum">2</div></div>
+                <div class="wkb">
+                    <h3>Modelling — Flower, Mushroom, Cottage &amp; Environment</h3>
+                    <div class="wktheme">Replacing rough blocks with clean, production-ready geometry</div>
+                    <div class="wkmile">🌸 Milestone: Flower built with circular array petals. Mushroom modelled. Cottage refined with hard surface topology. Foliage scattered. Scene complete in form.</div>
+                    <div class="wtopics">
+                        <span class="wtopic">Flower — circular array workflow</span>
+                        <span class="wtopic">Petal geometry &amp; shaping</span>
+                        <span class="wtopic">Mushroom — organic modelling</span>
+                        <span class="wtopic">Proportional editing</span>
+                        <span class="wtopic">Cottage — hard surface topology</span>
+                        <span class="wtopic">Bevel, Boolean, Subdivision</span>
+                        <span class="wtopic">Edge flow &amp; quad topology</span>
+                        <span class="wtopic">Curves &amp; stem modelling</span>
+                        <span class="wtopic">Geometry Nodes foliage scatter</span>
+                        <span class="wtopic">Non-destructive workflow</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WEEK 3 -->
+            <div class="wk" onclick="om('w3')">
+                <div class="wkn"><div class="wl">Week</div><div class="wnum">3</div></div>
+                <div class="wkb">
+                    <h3>Rigging, F-Curves, Audio + Materials &amp; Grease Pencil</h3>
+                    <div class="wktheme">The scene gains motion, colour and a 2D aesthetic in one intensive week</div>
+                    <div class="wkmile">🦴🎨 Milestone: Flower and mushroom rigged. Scene breathing with F-curve Noise and Cycles — no manual keyframes. Audio driving petal motion. All surfaces shaded. Grease Pencil line art active and adaptive.</div>
+                    <div class="wtopics">
+                        <span class="wtopic">Armatures — flower petal rig</span>
+                        <span class="wtopic">Mushroom IK stem rig</span>
+                        <span class="wtopic">Weight painting</span>
+                        <span class="wtopic">Bone constraints</span>
+                        <span class="wtopic">F-curve Noise modifier</span>
+                        <span class="wtopic">F-curve Cycles modifier</span>
+                        <span class="wtopic">Audio bake → F-curve</span>
+                        <span class="wtopic">Drivers &amp; custom properties</span>
+                        <span class="wtopic">Shader Editor &amp; PBR</span>
+                        <span class="wtopic">UV unwrapping</span>
+                        <span class="wtopic">Texture painting (Ucupaint)</span>
+                        <span class="wtopic">Toon shading &amp; Grease Pencil</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WEEK 4 -->
+            <div class="wk" onclick="om('w4')">
+                <div class="wkn"><div class="wl">Week</div><div class="wnum">4</div></div>
+                <div class="wkb">
+                    <h3>Camera Path, Animation &amp; Final Output</h3>
+                    <div class="wktheme">The scene moves, breathes, responds to sound — and is delivered</div>
+                    <div class="wkmile">✅ Milestone: Camera moving along a Bezier path through the meadow. Audio-driven animation finalised. Grease Pencil output rendered. Compositing pass set exported for After Effects and Toon Boom Harmony.</div>
+                    <div class="wtopics">
+                        <span class="wtopic">Bezier curve path</span>
+                        <span class="wtopic">Camera Follow Path constraint</span>
+                        <span class="wtopic">Track To — camera look-at</span>
+                        <span class="wtopic">Focal length &amp; depth of field</span>
+                        <span class="wtopic">Animated focus pull</span>
+                        <span class="wtopic">Audio-driven animation</span>
+                        <span class="wtopic">NLA &amp; Dope Sheet</span>
+                        <span class="wtopic">Grease Pencil Line Art</span>
+                        <span class="wtopic">2D depth layering</span>
+                        <span class="wtopic">Render passes (EXR)</span>
+                        <span class="wtopic">After Effects pipeline</span>
+                        <span class="wtopic">Toon Boom Harmony handoff</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FULL CURRICULUM -->
+    <div class="glass section">
+        <h2 class="stitle">Full Curriculum</h2>
+        <div class="cgrid">
+            <div class="card glass" onclick="om('cm1')">
+                <h3>Blender Foundations</h3>
+                <ul>
+                    <li>Interface, workspaces and viewport navigation</li>
+                    <li>Object manipulation — axis locking, numeric input</li>
+                    <li>Scene collections, naming conventions, file hygiene</li>
+                    <li>Working to spec — units, scale, project structure</li>
+                    <li>Modifiers: Mirror, Array (linear + circular), Solidify, Bevel, Boolean, Subdivision</li>
+                    <li>Working from client reference — pitfalls and corrections</li>
+                </ul>
+            </div>
+            <div class="card glass" onclick="om('cm2')">
+                <h3>Modelling Techniques</h3>
+                <ul>
+                    <li>Polygon modelling — loop cut, inset, bridge, extrude</li>
+                    <li>Edge flow and quad topology</li>
+                    <li>Circular Array — radially symmetric assets</li>
+                    <li>Organic forms — proportional editing, sculpting</li>
+                    <li>Curves → Mesh → Grease Pencil conversion</li>
+                    <li>Geometry Nodes for foliage and environment scatter</li>
+                    <li>High poly / low poly production decisions</li>
+                </ul>
+            </div>
+            <div class="card glass" onclick="om('cm3')">
+                <h3>Rigging &amp; Procedural Animation</h3>
+                <ul>
+                    <li>Armature hierarchy — flower petal rig, mushroom IK stem</li>
+                    <li>Weight painting and vertex group assignment</li>
+                    <li>Bone constraints — IK, Copy Rotation, Limit Rotation</li>
+                    <li>Custom bone shapes for clean animator controls</li>
+                    <li>F-curve Noise modifier — organic randomness per channel</li>
+                    <li>F-curve Cycles modifier — seamless looping background motion</li>
+                    <li>Drivers and custom properties</li>
+                </ul>
+            </div>
+            <div class="card glass" onclick="om('cm4')">
+                <h3>Audio-Driven Animation</h3>
+                <ul>
+                    <li>Audio import into the Blender timeline</li>
+                    <li>Sound amplitude baked to F-curve keyframes</li>
+                    <li>Driver setup — amplitude output bound to bone rotation</li>
+                    <li>Per-petal stagger for natural, non-synchronised response</li>
+                    <li>Graph Editor — reading, shaping and refining F-curves</li>
+                    <li>NLA (Non-Linear Animation) — action clip management</li>
+                </ul>
+            </div>
+            <div class="card glass" onclick="om('cm5')">
+                <h3>Materials, Texturing &amp; Grease Pencil</h3>
+                <ul>
+                    <li>Shader Editor — Principled BSDF, node networks</li>
+                    <li>UV unwrapping — Texel Density, UDIM workflow</li>
+                    <li>Texture painting — Ucupaint layer-based workflow</li>
+                    <li>PBR — Metallic, Roughness, Normal maps</li>
+                    <li>Toon shading — Shader-to-RGB, Colour Ramp cel look</li>
+                    <li>Grease Pencil Line Art — stroke thickness variability by camera distance</li>
+                    <li>Grease Pencil materials — Stroke and Fill settings</li>
+                </ul>
+            </div>
+            <div class="card glass" onclick="om('cm6')">
+                <h3>Camera, Lighting &amp; Output</h3>
+                <ul>
+                    <li>Follow Path — camera path animation and speed control</li>
+                    <li>Track To — smooth look-at camera behaviour</li>
+                    <li>Focal length — wide for environment, telephoto for portrait</li>
+                    <li>Depth of Field — aperture and animated focus pull</li>
+                    <li>Render passes — Diffuse, Depth, Shadow, GP Outline as EXR</li>
+                    <li>After Effects &amp; Toon Boom Harmony export and handoff</li>
+                    <li>Versioning and multi-file collaboration practices</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- LEARNING OUTCOMES -->
+    <div class="glass section">
+        <h2 class="stitle">Learning Outcomes</h2>
+        <div class="ogrid">
+            <div class="oitem glass" onclick="om('o1')">
+                <div class="odot"></div>
+                <div class="otext"><strong>Navigate Blender at production speed</strong> — interface, viewport and scene management from session one</div>
+            </div>
+            <div class="oitem glass" onclick="om('o2')">
+                <div class="odot"></div>
+                <div class="otext"><strong>Model hard surface and organic assets</strong> — including circular array for radially symmetric geometry</div>
+            </div>
+            <div class="oitem glass" onclick="om('o3')">
+                <div class="odot"></div>
+                <div class="otext"><strong>Rig a flower and mushroom</strong> — individual petal bones, IK stem chain, clean animator controls</div>
+            </div>
+            <div class="oitem glass" onclick="om('o4')">
+                <div class="odot"></div>
+                <div class="otext"><strong>Apply F-curve Noise and Cycles</strong> — organic, looping procedural motion without manual keyframing</div>
+            </div>
+            <div class="oitem glass" onclick="om('o5')">
+                <div class="odot"></div>
+                <div class="otext"><strong>Drive animation from audio</strong> — bake amplitude to F-curve, bind to rig via Drivers</div>
+            </div>
+            <div class="oitem glass" onclick="om('o6')">
+                <div class="odot"></div>
+                <div class="otext"><strong>Animate a camera along a path</strong> — Follow Path, Track To, animated DoF focus pull</div>
+            </div>
+            <div class="oitem glass" onclick="om('o7')">
+                <div class="odot"></div>
+                <div class="otext"><strong>Apply toon shading and Grease Pencil</strong> — 2D line art with adaptive stroke variability for LHS visual output</div>
+            </div>
+            <div class="oitem glass" onclick="om('o8')">
+                <div class="odot"></div>
+                <div class="otext"><strong>Export compositing-ready passes</strong> — depth, diffuse, shadow and outline for After Effects and Toon Boom</div>
+            </div>
+            <div class="oitem glass" onclick="om('o9')">
+                <div class="odot"></div>
+                <div class="otext"><strong>Complete a full production scene from scratch</strong> — block-out through to delivery, matching real pipeline practice</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WHO + REQUIREMENTS -->
+    <div class="glass section">
+        <h2 class="stitle">Who Is This For</h2>
+        <div class="cgrid">
+            <div class="card glass" onclick="om('who')">
+                <h3>Lighthouse Studios Crew</h3>
+                <ul>
+                    <li>Animators, layout artists and background artists</li>
+                    <li>FX artists exploring 3D simulation alongside 2D workflows</li>
+                    <li>Crew with Toon Boom / AE experience integrating Blender</li>
+                    <li>No prior Blender experience required — starts from first principles</li>
+                    <li>Existing 2D animation knowledge is an asset, not a prerequisite</li>
+                    <li>Number of participants — to be confirmed with LHS</li>
+                </ul>
+            </div>
+            <div class="card glass" onclick="om('req')">
+                <h3>Technical Requirements</h3>
+                <ul>
+                    <li>Computer capable of running Blender 4.x (free at blender.org)</li>
+                    <li>3-button mouse — essential for 3D navigation</li>
+                    <li>Stable internet connection for online sessions</li>
+                    <li>Toon Boom Harmony and/or After Effects for Week 4 pipeline session</li>
+                    <li>Audio file for Week 3 and 4 — provided, or participant's own</li>
+                    <li>No licensing costs — Blender is fully free and open-source</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- DELIVERY -->
+    <div class="glass section">
+        <h2 class="stitle">Delivery</h2>
+        <div class="dpills">
+            <div class="dpill" onclick="om('d1')">
+                <span class="di">💻</span>
+                <div><strong>Online</strong> — with on-site coordination available based on crew numbers and LHS IT resources</div>
+            </div>
+            <div class="dpill" onclick="om('d2')">
+                <span class="di">📅</span>
+                <div><strong>2 sessions/week</strong>, 2 hours each — flexible Mon–Thu scheduling, 9am–9pm</div>
+            </div>
+            <div class="dpill" onclick="om('d3')">
+                <span class="di">📹</span>
+                <div><strong>All sessions recorded</strong> — full access for every participant, immediately after each session</div>
+            </div>
+            <div class="dpill" onclick="om('d4')">
+                <span class="di">🧑‍💻</span>
+                <div><strong>1:1 Consultations</strong> — 30-min slots in Weeks 1 and 2, Mon–Thu, 9am–9pm</div>
+            </div>
+            <div class="dpill" onclick="om('d5')">
+                <span class="di">📁</span>
+                <div><strong>Scene checkpoint files</strong> — distributed after every session so all participants start from the same point</div>
+            </div>
+            <div class="dpill" onclick="om('d6')">
+                <span class="di">📜</span>
+                <div><strong>Certificate of completion</strong> — issued to all participants who complete the programme</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BEYOND THE BASICS -->
+    <div class="glass beyond">
+        <div class="beyondlabel">Future Exploration</div>
+        <h2>Beyond the Basics</h2>
+        <p>The four-week programme is a complete, strong foundation. These specialised workshops are available as follow-on sessions for crew who want to go deeper in specific areas.</p>
+        <div class="bgrid">
+            <div class="bc">
+                <div class="bc-ico">✏️</div>
+                <h4>Grease Pencil for Production Animation</h4>
+                <p>Advanced 2D animation within Blender — drawing in 3D space, layer management, onion skinning, and integrating Grease Pencil sequences into Toon Boom. Reusable GP rigs and background cycles.</p>
+            </div>
+            <div class="bc">
+                <div class="bc-ico">⚡</div>
+                <h4>FX — Simulations &amp; Speed Lines</h4>
+                <p>Particle systems, cloth physics, and fluid simulations for FX artists. Speed line generation across multiple styles. Sprite projection and object-wrap for hybrid 2D/3D effects.</p>
+            </div>
+            <div class="bc">
+                <div class="bc-ico">🔗</div>
+                <h4>Advanced Hybrid 2D/3D Pipeline</h4>
+                <p>Deeper integration between Blender, Toon Boom, and After Effects. Python API scripting and addon development for pipeline automation. Output methods and compositing approaches built specifically for 2D animation production.</p>
+            </div>
+            <div class="bc">
+                <div class="bc-ico">🎨</div>
+                <h4>Advanced Compositing &amp; Rendering</h4>
+                <p>Blender's compositor in depth — colour grading, advanced lighting, multi-pass setups. Cycles vs. EEVEE trade-offs and optimisation. Multi-layer EXR workflows for DaVinci Resolve and After Effects.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- BEYOND THE PROGRAMME (partnership) -->
+    <div class="glass partnership">
+        <div class="plabel">Natural Extensions</div>
+        <h2>Beyond the Programme</h2>
+        <p>Three offerings that arise naturally from the work we do together — not obligations, but practical investments in the LHS team and workflow that make sense once the training is underway.</p>
+        <div class="p3">
+            <div class="pc">
+                <div class="pcn">01</div>
+                <h4>Companion App — Blender Addon + Web Interface</h4>
+                <p>A dedicated Blender addon that guides crew through each session from inside the software — task checklists, technique references, and contextual tips visible in the viewport without leaving Blender. Paired with a web interface for progress tracking, session notes, and asset access. Built for current crew and future cohorts alike.</p>
+                <span class="ptag">Blender Addon + Web</span>
+            </div>
+            <div class="pc">
+                <div class="pcn">02</div>
+                <h4>LHS Blender Standard Operating Procedure</h4>
+                <p>The curriculum, workflows, and best practices developed during training formalised into a living LHS SOP document — defining Blender's role in the pipeline, file structure standards, handoff protocols, and expected outputs. A document the studio owns and evolves.</p>
+                <span class="ptag">Internal Document</span>
+            </div>
+            <div class="pc">
+                <div class="pcn">03</div>
+                <h4>4E as Ongoing Training Partner</h4>
+                <p>4E Virtual Design is available throughout and beyond the programme for additional training, production consultation, or technical support. Not a one-off provider — a partner available at any stage, for individual crew members, new hires, or specific production challenges as they arise.</p>
+                <span class="ptag">Ongoing Partnership</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="glass footer">
+        <div class="ftext">
+            Proposed by <strong>4E Virtual Design</strong><br>
+            in partnership with Lighthouse Studios · Kilkenny, Ireland · 2026
+        </div>
+        <div class="flogos">
+            <div class="lbox">
+                <img src="LHS.png" alt="Lighthouse Studios" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                <span class="ltext">LHS</span>
+            </div>
+            <div class="lsep"></div>
+            <div class="lbox">
+                <img src="4e.png" alt="4E Virtual Design" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                <span class="ltext">4E</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="scind"><div class="sca"></div></div>
+
+<!-- ═══════ MODALS ═══════ -->
+
+<div class="mo" id="mo-weeks" onclick="cm(event,'weeks')"><div class="m" onclick="event.stopPropagation()">
+<button class="mcl" onclick="cm(event,'weeks')">×</button>
+<div class="mh"><div class="mk">Programme Length</div><div class="mt">4-Week Timeline</div></div>
+<div class="mc">
+<p>Four weeks, two 2-hour sessions each week. The structure is deliberately progressive — everything built on what came before, always visible in the shared scene file established on day one.</p>
+<div class="ms"><h3>Week by Week</h3><ul>
+<li>Week 1 — Foundations + complete scene block-out</li>
+<li>Week 2 — Modelling: flower (circular array), mushroom, cottage, environment</li>
+<li>Week 3 — Rigging + F-curves + audio + materials + Grease Pencil</li>
+<li>Week 4 — Camera path, animation, compositing passes, final output</li>
+</ul></div>
+<div class="ms"><h3>Between Sessions</h3><p>Scene checkpoint files distributed after every session. Recordings available immediately. Individual consultation slots available in Weeks 1 and 2.</p></div>
+</div></div></div>
+
+<div class="mo" id="mo-sessions" onclick="cm(event,'sessions')"><div class="m" onclick="event.stopPropagation()">
+<button class="mcl" onclick="cm(event,'sessions')">×</button>
+<div class="mh"><div class="mk">Group Training</div><div class="mt">8 Sessions</div></div>
+<div class="mc">
+<p>Eight sessions of two hours each, over four weeks — two sessions per week. The split between instruction and hands-on practice means participants are actively building in the shared scene file by the halfway point of each session.</p>
+<div class="ms"><h3>Session Format</h3>
+<div class="fb"><strong>Instructor-Led Demonstration (60–75 min)</strong><p>Screen-share instruction covering the week's techniques in the context of the shared scene — always advancing the same file.</p></div>
+<div class="fb"><strong>Guided Practice (45–55 min)</strong><p>Participants work on their own scene. Instructor available for real-time support and troubleshooting.</p></div>
+<div class="fb"><strong>Review & Preview (10–15 min)</strong><p>Share progress, address questions, preview what the next session builds on top of.</p></div>
+</div></div></div></div>
+
+<div class="mo" id="mo-consult" onclick="cm(event,'consult')"><div class="m" onclick="event.stopPropagation()">
+<button class="mcl" onclick="cm(event,'consult')">×</button>
+<div class="mh"><div class="mk">Individual Support</div><div class="mt">1:1 Consultations</div></div>
+<div class="mc">
+<p>30-minute individual slots available in Weeks 1 and 2. Four slots per day, Monday to Thursday, between 9am and 9pm — designed to fit around the LHS production schedule.</p>
+<div class="ms"><h3>What Happens</h3>
+<div class="fb"><strong>Personal troubleshooting</strong><p>Work through specific challenges from group sessions or independent exploration.</p></div>
+<div class="fb"><strong>Role-specific guidance</strong><p>How Blender connects to your particular discipline — layout, FX, backgrounds, animation.</p></div>
+<div class="fb"><strong>Next steps</strong><p>Areas for further exploration relevant to your production role at LHS.</p></div>
+</div></div></div></div>
+
+<div class="mo" id="mo-format" onclick="cm(event,'format')"><div class="m" onclick="event.stopPropagation()">
+<button class="mcl" onclick="cm(event,'format')">×</button>
+<div class="mh"><div class="mk">Session Length</div><div class="mt">2 Hours Per Session</div></div>
+<div class="mc"><p>Two focused hours per session — no filler. The split between instruction and practice ensures every participant is working in Blender, not just watching, by the midpoint of each session. Sessions are recorded and available immediately after they end.</p>
+<div class="ms"><h3>Practical Details</h3><ul>
+<li>Online delivery as standard, on-site available</li>
+<li>Mon–Thu scheduling, 9am–9pm</li>
+<li>All sessions recorded — accessible immediately after</li>
+<li>Scene checkpoint files shared after every session</li>
+</ul></div></div></div></div>
+
+<div class="mo" id="mo-mode" onclick="cm(event,'mode')"><div class="m" onclick="event.stopPropagation()">
+<button class="mcl" onclick="cm(event,'mode')">×</button>
+<div class="mh"><div class="mk">Delivery Mode</div><div class="mt">Online / On-Site</div></div>
+<div class="mc"><p>Sessions are designed for online delivery via video conferencing with full screen-share and real-time interaction. On-site delivery at LHS in Kilkenny can be coordinated depending on crew numbers, available dates, and IT resources at the studio.</p>
+<div class="mnote">Both modes deliver the same programme content and quality. On-site can be preferable for certain technical sessions.</div></div></div></div>
+
+<!-- Week modals -->
+<div class="mo" id="mo-w1" onclick="cm(event,'w1')"><div class="m" onclick="event.stopPropagation()">
+<button class="mcl" onclick="cm(event,'w1')">×</button>
+<div class="mh"><div class="mk">Week 1</div><div class="mt">Foundations &amp; Full Scene Block-Out</div></div>
+<div class="mc">
+<p>Two jobs in Week 1: get crew comfortable in Blender, and build the complete rough scene. By the end of Session 2, the whole world exists — hill, cottage, meadow, flower, mushroom, camera. Everything that follows refines what's already there.</p>
+<div class="ms"><h3>Session 1: Interface &amp; Navigation</h3><ul>
+<li>Blender interface — editors, workspaces, layout customisation</li>
+<li>Viewport navigation — middle mouse, numpad, orbit, pan, zoom</li>
+<li>Object mode vs. Edit mode</li>
+<li>Object manipulation — G, R, S with axis locking and numeric input</li>
+<li>Primitive objects and basic mesh editing</li>
+<li>Scene setup — units, scale, naming, collections</li>
+</ul></div>
+<div class="ms"><h3>Session 2: Block-Out — The Whole Scene</h3><ul>
+<li>Mirror and Array modifiers — building forms quickly</li>
+<li>Importing client reference — alignment pitfalls and how to resolve them</li>
+<li>Block-out methodology — why rough first is the right production approach</li>
+<li>Rough cottage on the hill, rough flower, rough mushroom</li>
+<li>Camera placed and framed — composition established from day one</li>
+<li>Grease Pencil introduction — role in the 2D animation pipeline</li>
+</ul></div>
+<div class="fb"><strong>🧱 Scene Milestone</strong><p>The complete scene exists in rough form. Every element in place. Proportions and composition locked.</p></div>
+</div></div></div>
+
+<div class="mo" id="mo-w2" onclick="cm(event,'w2')"><div class="m" onclick="event.stopPropagation()">
+<button class="mcl" onclick="cm(event,'w2')">×</button>
+<div class="mh"><div class="mk">Week 2</div><div class="mt">Modelling — Flower, Mushroom, Cottage &amp; Environment</div></div>
+<div class="mc">
+<p>Three assets modelled and the environment built out, each replacing its rough block-out counterpart. The flower introduces the circular array workflow. The mushroom introduces organic modelling. The cottage introduces hard surface topology.</p>
+<div class="ms"><h3>Session 3: Flower + Mushroom</h3><ul>
+<li>Flower petal — modelled with Loop Cut, Extrude, proportional editing</li>
+<li>Circular Array — petals distributed radially; count, radius, pivot explored</li>
+<li>Stamen and disc geometry modelled and integrated</li>
+<li>Stem — Bezier curve drawn, converted to mesh</li>
+<li>Mushroom cap — Loop Cut topology, organic shaping</li>
+<li>Mushroom stem — Subdivision Surface for smooth cap transition</li>
+<li>High poly vs. low poly decisions for production</li>
+</ul></div>
+<div class="ms"><h3>Session 4: Cottage + Environment</h3><ul>
+<li>Cottage walls, roof, windows, door — polygon modelling from block-out</li>
+<li>Edge flow and quad topology — clean, production-ready geometry</li>
+<li>Bevel modifier — soft edges without manual edge loops</li>
+<li>Boolean operations — window and door cutouts non-destructively</li>
+<li>Terrain mesh — Subdivide and proportional editing for landscape variation</li>
+<li>Geometry Nodes foliage scatter across the meadow</li>
+<li>Curves for additional organic plant forms</li>
+</ul></div>
+<div class="fb"><strong>🌸 Scene Milestone</strong><p>All assets modelled and placed. The scene is geometrically complete — ready for rigging and shading.</p></div>
+</div></div></div>
+
+<div class="mo" id="mo-w3" onclick="cm(event,'w3')"><div class="m" onclick="event.stopPropagation()">
+<button class="mcl" onclick="cm(event,'w3')">×</button>
+<div class="mh"><div class="mk">Week 3</div><div class="mt">Rigging, F-Curves, Audio + Materials &amp; Grease Pencil</div></div>
+<div class="mc">
+<p>Week 3 is the programme's most intensive week — combining rigging, procedural animation, materials and Grease Pencil shading into two sessions. By the end, the scene is moving organically, responding to audio, and reading as a stylised 2D animation output.</p>
+<div class="ms"><h3>Session 5: Rigging + F-Curve Modifiers + Audio</h3><ul>
+<li>Armature basics — bone creation, naming, hierarchy</li>
+<li>Flower rig — stem chain + individual petal bones with central root parent</li>
+<li>Mushroom rig — IK stem chain, cap bounce bone, weight painting</li>
+<li>Bone constraints — IK solver, Copy Rotation, Limit Rotation</li>
+<li>Custom bone shapes for clean animator-facing controls</li>
+<li>Graph Editor — reading and editing F-curves</li>
+<li>F-Curve Noise Modifier — strength, scale, depth, phase; applied per petal bone</li>
+<li>F-Curve Cycles Modifier — seamless looping without manual keyframe repetition</li>
+<li>Audio import — baking sound amplitude to an F-curve action</li>
+<li>Driver setup — audio amplitude bound to petal bone rotation</li>
+<li>Staggered per-petal offset for natural, non-synchronised response</li>
+</ul></div>
+<div class="ms"><h3>Session 6: Materials, Texturing &amp; Grease Pencil</h3><ul>
+<li>Shader Editor — Principled BSDF, material slots, node basics</li>
+<li>UV unwrapping — seam placement, UV islands, Texel Density</li>
+<li>PBR materials — Metallic, Roughness, Normal map connections</li>
+<li>Procedural textures — Noise, Voronoi, Colour Ramp</li>
+<li>Texture painting with Ucupaint — layer-based non-destructive workflow</li>
+<li>Toon shading — Shader-to-RGB, Colour Ramp for flat cel look</li>
+<li>Grease Pencil Line Art modifier — applied over the full 3D scene</li>
+<li>Stroke settings — thickness, opacity, adaptive variability by camera distance</li>
+<li>Grease Pencil materials — Stroke and Fill</li>
+<li>Scene lighting — HDRI, area lights, rim light for stylised 2D aesthetic</li>
+</ul></div>
+<div class="fb"><strong>🦴🎨 Scene Milestone</strong><p>Flower and mushroom rigged and moving organically via Noise/Cycles — no manual keyframes. Audio driving petal motion. All surfaces shaded. Grease Pencil line art active and adaptive.</p></div>
+</div></div></div>
+
+<div class="mo" id="mo-w4" onclick="cm(event,'w4')"><div class="m" onclick="event.stopPropagation()">
+<button class="mcl" onclick="cm(event,'w4')">×</button>
+<div class="mh"><div class="mk">Week 4</div><div class="mt">Camera Path, Animation &amp; Final Output</div></div>
+<div class="mc">
+<p>The final week is where everything performs — camera moves through the meadow, rigs breathe with organic life, audio drives the motion, and the complete output is delivered ready for the LHS compositing pipeline.</p>
+<div class="ms"><h3>Session 7: Camera Path &amp; Composition</h3><ul>
+<li>Bezier curve path drawn through the scene — entrance, traverse, frame the cottage</li>
+<li>Follow Path constraint — camera assigned to path with controllable speed</li>
+<li>Track To constraint — camera tracks a target for smooth look-at behaviour</li>
+<li>Lenses — wide for environment, telephoto for detail and portrait framing</li>
+<li>Depth of Field — aperture and focus distance</li>
+<li>Animated focus pull — keyframed from foreground flower to cottage</li>
+<li>Scene composition review — final framing confirmed</li>
+</ul></div>
+<div class="ms"><h3>Session 8: Animation Finalisation &amp; Output</h3><ul>
+<li>Audio-driven animation finalised — driver refined and tested</li>
+<li>Dope Sheet and NLA — managing and layering action clips</li>
+<li>Grease Pencil Line Art — final render settings confirmed</li>
+<li>2D depth layering — plane-cut passes and Z-depth compositing</li>
+<li>Render passes — Diffuse, Depth, Shadow, GP Outline as EXR</li>
+<li>Export for After Effects — multi-layer EXR workflow</li>
+<li>File prep for Toon Boom Harmony — image sequence and pass integration</li>
+<li>Versioning and file handoff — passing a Blender project between collaborators</li>
+<li>Programme review — what was built, what was learned, what comes next</li>
+</ul></div>
+<div class="fb"><strong>✅ Programme Complete</strong><p>A fully animated 3D meadow scene — camera on a path, rigged flower and mushroom, audio-driven motion, Grease Pencil 2D output, and a complete compositing pass set. Built from block-out to delivery in four weeks.</p></div>
+</div></div></div>
+
+<!-- Curriculum modals -->
+<div class="mo" id="mo-cm1" onclick="cm(event,'cm1')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'cm1')">×</button><div class="mh"><div class="mk">Curriculum</div><div class="mt">Blender Foundations</div></div><div class="mc"><p>Week 1 covers everything needed to work confidently in Blender — from navigation to a complete rough block-out of the shared scene.</p><div class="ms"><h3>Key Topics</h3><ul><li>Viewport navigation and essential keyboard shortcuts</li><li>Object manipulation — G R S with axis locking and numeric input</li><li>Primitives, Edit mode, and core mesh editing tools</li><li>Modifiers: Mirror, Array (linear + circular), Solidify, Subdivision, Bevel, Boolean</li><li>Scene collections, naming conventions, production file hygiene</li><li>Working to spec — units, scale, project structure</li><li>Client reference import and common alignment pitfalls</li></ul></div></div></div></div>
+
+<div class="mo" id="mo-cm2" onclick="cm(event,'cm2')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'cm2')">×</button><div class="mh"><div class="mk">Curriculum</div><div class="mt">Modelling Techniques</div></div><div class="mc"><p>Week 2 covers hard surface and organic modelling through three production assets — the flower, the mushroom, and the cottage — plus environment foliage via Geometry Nodes.</p><div class="ms"><h3>Key Topics</h3><ul><li>Polygon modelling — box, loop cut, inset, bridge, extrude</li><li>Circular Array — radially symmetric geometry, procedurally</li><li>Edge flow and quad topology — production-ready geometry</li><li>Organic modelling — proportional editing, sculpting basics</li><li>Curves → Mesh → Grease Pencil conversion pipeline</li><li>Geometry Nodes for foliage scatter and environment variation</li><li>High poly vs. low poly — production efficiency decisions</li></ul></div></div></div></div>
+
+<div class="mo" id="mo-cm3" onclick="cm(event,'cm3')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'cm3')">×</button><div class="mh"><div class="mk">Curriculum</div><div class="mt">Rigging &amp; Procedural Animation</div></div><div class="mc"><p>Rigging is taught through two approachable assets — the flower and mushroom — covering the full range of fundamentals transferable to any future character or creature rig at LHS.</p><div class="ms"><h3>Key Topics</h3><ul><li>Armature creation — bones, naming, hierarchy</li><li>Flower rig — individual petal bones with central root parent</li><li>Mushroom rig — IK stem chain with cap controller</li><li>Weight painting — smooth organic deformation transitions</li><li>Bone constraints — IK, Copy Rotation, Limit Rotation</li><li>Custom bone shapes — clean animator-facing controls</li><li>F-Curve Noise Modifier — organic procedural randomness per channel</li><li>F-Curve Cycles Modifier — seamless looping background motion</li><li>Drivers and custom properties</li></ul></div></div></div></div>
+
+<div class="mo" id="mo-cm4" onclick="cm(event,'cm4')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'cm4')">×</button><div class="mh"><div class="mk">Curriculum</div><div class="mt">Audio-Driven Animation</div></div><div class="mc"><p>One of the programme's most immediately distinctive capabilities — scenes that respond to sound, built without a single manually placed keyframe on the reactive elements.</p><div class="ms"><h3>Key Topics</h3><ul><li>Audio file import into Blender timeline</li><li>Sound amplitude baked to F-curve keyframes</li><li>Graph Editor — reading and refining the amplitude curve</li><li>Driver setup — amplitude output bound to petal bone rotation</li><li>Per-petal stagger offset for natural, non-synchronised response</li><li>NLA (Non-Linear Animation) — action clip management and layering</li><li>Practical applications: music-driven animation, reactive backgrounds, broadcast titles</li></ul></div></div></div></div>
+
+<div class="mo" id="mo-cm5" onclick="cm(event,'cm5')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'cm5')">×</button><div class="mh"><div class="mk">Curriculum</div><div class="mt">Materials, Texturing &amp; Grease Pencil</div></div><div class="mc"><p>Materials are taught with two goals: technical correctness for production export, and stylistic suitability for LHS's 2D animation visual language.</p><div class="ms"><h3>Key Topics</h3><ul><li>Shader Editor — Principled BSDF, node network basics</li><li>UV unwrapping — seams, islands, Texel Density, UDIM overview</li><li>Texture painting — Ucupaint layer workflow, non-destructive approach</li><li>PBR — Metallic, Roughness, Normal map connections</li><li>Procedural textures — Noise, Voronoi, Wave, Colour Ramp</li><li>Toon shading — Shader-to-RGB, Colour Ramp cel shading</li><li>Grease Pencil Line Art — stroke thickness variability by camera distance and angle</li><li>Grease Pencil materials — Stroke and Fill settings</li></ul></div></div></div></div>
+
+<div class="mo" id="mo-cm6" onclick="cm(event,'cm6')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'cm6')">×</button><div class="mh"><div class="mk">Curriculum</div><div class="mt">Camera, Lighting &amp; Output</div></div><div class="mc"><p>Camera and output are treated as production disciplines — not afterthoughts. Camera work references real cinematography principles and Maya equivalents where relevant, and output is structured around what LHS actually needs from a compositing handoff.</p><div class="ms"><h3>Key Topics</h3><ul><li>Follow Path constraint — camera path animation and speed control</li><li>Track To constraint — smooth look-at behaviour</li><li>Focal length — 16mm wide through 85mm portrait</li><li>Depth of Field — aperture, focus distance, animated focus pull</li><li>Grease Pencil Line Art — scene-wide 2D line rendering</li><li>2D depth layering — plane cuts and Z-depth passes</li><li>Render passes — Diffuse, Depth, Shadow, Outline as multi-layer EXR</li><li>After Effects and Toon Boom Harmony export and handoff</li></ul></div></div></div></div>
+
+<!-- Outcome modals -->
+<div class="mo" id="mo-o1" onclick="cm(event,'o1')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'o1')">×</button><div class="mh"><div class="mk">Outcome</div><div class="mt">Navigate Blender at Production Speed</div></div><div class="mc"><p>By the end of Week 1, participants move through Blender without hesitation. The block-out methodology means they're working at production pace from session one — not running tutorial exercises in isolation.</p></div></div></div>
+
+<div class="mo" id="mo-o2" onclick="cm(event,'o2')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'o2')">×</button><div class="mh"><div class="mk">Outcome</div><div class="mt">Model Hard Surface &amp; Organic Assets</div></div><div class="mc"><p>From the geometry of a cottage roof to the curve of a mushroom cap, participants understand how to approach both technical and natural forms with appropriate topology. The Circular Array workflow introduces procedural modelling thinking applicable across many asset types.</p></div></div></div>
+
+<div class="mo" id="mo-o3" onclick="cm(event,'o3')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'o3')">×</button><div class="mh"><div class="mk">Outcome</div><div class="mt">Rig a Flower and Mushroom</div></div><div class="mc"><p>Participants will be able to build and skin a rig for both a complex petal-based form (the flower) and an organic deforming asset (the mushroom). The principles — armature hierarchy, weight painting, IK constraints, custom bone shapes — transfer directly to any future character or creature rig at LHS.</p></div></div></div>
+
+<div class="mo" id="mo-o4" onclick="cm(event,'o4')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'o4')">×</button><div class="mh"><div class="mk">Outcome</div><div class="mt">F-Curve Noise &amp; Cycles Modifiers</div></div><div class="mc"><p>Participants understand how to apply procedural animation to any channel in Blender. Noise creates organic randomness — Cycles creates seamless looping. Together they allow background elements to feel alive perpetually without additional keyframing — particularly valuable for LHS's background and environment work.</p></div></div></div>
+
+<div class="mo" id="mo-o5" onclick="cm(event,'o5')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'o5')">×</button><div class="mh"><div class="mk">Outcome</div><div class="mt">Drive Animation from Audio</div></div><div class="mc"><p>Participants understand the complete workflow: import audio, bake amplitude to an F-curve, bind to a rig control via Drivers. The scene responds to sound — opening up music-driven animation, reactive backgrounds, broadcast titles, and any project where motion and audio need to connect.</p></div></div></div>
+
+<div class="mo" id="mo-o6" onclick="cm(event,'o6')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'o6')">×</button><div class="mh"><div class="mk">Outcome</div><div class="mt">Animate a Camera Along a Path</div></div><div class="mc"><p>Participants can draw a Bezier path through any scene, assign a camera via Follow Path, and control its speed, easing, and direction over time. Combined with Track To and animated DoF, this creates smooth cinematic camera movement with minimal setup — directly comparable to Maya's Follow Path workflow.</p></div></div></div>
+
+<div class="mo" id="mo-o7" onclick="cm(event,'o7')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'o7')">×</button><div class="mh"><div class="mk">Outcome</div><div class="mt">Grease Pencil 2D Output</div></div><div class="mc"><p>Participants can apply and configure Grease Pencil Line Art over a full 3D scene — producing stylised 2D line outputs with stroke variability responsive to camera angle and distance. The visual output is matched to LHS's animation aesthetic and integrates cleanly with Toon Boom and After Effects.</p></div></div></div>
+
+<div class="mo" id="mo-o8" onclick="cm(event,'o8')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'o8')">×</button><div class="mh"><div class="mk">Outcome</div><div class="mt">Export Compositing-Ready Passes</div></div><div class="mc"><p>Participants can configure Blender to produce a complete compositing pass set — Diffuse, Depth, Shadow, and Grease Pencil Outline — as multi-layer EXR. They understand how to import and use these passes in After Effects and how they relate to Toon Boom Harmony's compositing pipeline.</p></div></div></div>
+
+<div class="mo" id="mo-o9" onclick="cm(event,'o9')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'o9')">×</button><div class="mh"><div class="mk">Outcome</div><div class="mt">Complete a Full Production Scene</div></div><div class="mc"><p>The most significant outcome is the scene itself — a complete, animated 3D meadow with a rigged flower, rigged mushroom, cottage, camera on a path, audio-driven motion, Grease Pencil 2D output, and a full compositing pass set. Built from block-out to delivery in four weeks. A genuine portfolio piece and a proof of what Blender can do within the LHS pipeline.</p></div></div></div>
+
+<!-- Who / Req -->
+<div class="mo" id="mo-who" onclick="cm(event,'who')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'who')">×</button><div class="mh"><div class="mk">Participants</div><div class="mt">Lighthouse Studios Crew</div></div><div class="mc"><p>Built for working animation professionals at LHS. No prior Blender experience required — the programme starts from first principles and every decision is made in the context of your existing production workflow. Prior 2D animation knowledge and visual storytelling instincts are an asset throughout.</p><div class="ms"><h3>Best Suited For</h3><ul><li>Animators looking to use 3D as a layout and reference tool</li><li>Layout artists integrating 3D environment blocking</li><li>FX artists exploring simulation and hybrid 2D/3D effects</li><li>Background artists interested in 3D-assisted environment creation</li><li>Any crew member with interest in Blender's role in production</li></ul></div></div></div></div>
+
+<div class="mo" id="mo-req" onclick="cm(event,'req')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'req')">×</button><div class="mh"><div class="mk">Requirements</div><div class="mt">Technical Setup</div></div><div class="mc"><div class="ms"><h3>Hardware &amp; Software</h3><ul><li>Computer capable of running Blender 4.x — free at blender.org</li><li>GPU recommended (NVIDIA or AMD) — beneficial for rendering, not required</li><li>3-button mouse — essential for comfortable 3D navigation</li><li>Stable internet connection for online sessions</li><li>Toon Boom Harmony / After Effects for Week 4 pipeline session</li><li>Audio file for Weeks 3 and 4 — provided if preferred, or participant's own</li></ul></div><div class="mnote">Blender is free and open-source. No licensing costs for participants.</div></div></div></div>
+
+<!-- Delivery modals -->
+<div class="mo" id="mo-d1" onclick="cm(event,'d1')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'d1')">×</button><div class="mh"><div class="mk">Delivery</div><div class="mt">Online / On-Site</div></div><div class="mc"><p>Sessions are designed for online delivery via video conferencing with full screen-share and real-time interaction. On-site delivery at LHS in Kilkenny can be coordinated where practical — dependent on crew numbers, dates, and IT availability at the studio. Both modes deliver the same programme and quality.</p></div></div></div>
+
+<div class="mo" id="mo-d2" onclick="cm(event,'d2')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'d2')">×</button><div class="mh"><div class="mk">Delivery</div><div class="mt">Session Schedule</div></div><div class="mc"><p>Two sessions per week across four weeks. Scheduling is flexible Monday to Thursday, 9am to 9pm, to accommodate LHS's production schedule. Exact days and times confirmed with the studio before the programme begins.</p></div></div></div>
+
+<div class="mo" id="mo-d3" onclick="cm(event,'d3')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'d3')">×</button><div class="mh"><div class="mk">Delivery</div><div class="mt">Recorded Sessions</div></div><div class="mc"><p>Every session is recorded and made available to all participants immediately after it ends. Crew who miss a session can catch up in full. Participants can revisit any demonstration — particularly useful for the rigging, F-curve, driver, and camera sessions.</p></div></div></div>
+
+<div class="mo" id="mo-d4" onclick="cm(event,'d4')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'d4')">×</button><div class="mh"><div class="mk">Delivery</div><div class="mt">1:1 Consultations</div></div><div class="mc"><p>30-minute individual slots available in Weeks 1 and 2. Four slots per day, Monday to Thursday, 9am to 9pm. Booked via a shared scheduling link. Tailored to each participant's role and goals at LHS — troubleshooting, workflow questions, or planning personal applications of the programme material.</p></div></div></div>
+
+<div class="mo" id="mo-d5" onclick="cm(event,'d5')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'d5')">×</button><div class="mh"><div class="mk">Delivery</div><div class="mt">Scene Checkpoint Files</div></div><div class="mc"><p>After every session, a Blender scene checkpoint file is distributed — reflecting the current state of the shared meadow project. All participants begin the next session from the same starting point regardless of individual progress. Checkpoint files also serve as reference material and study resources between sessions.</p></div></div></div>
+
+<div class="mo" id="mo-d6" onclick="cm(event,'d6')"><div class="m" onclick="event.stopPropagation()"><button class="mcl" onclick="cm(event,'d6')">×</button><div class="mh"><div class="mk">Delivery</div><div class="mt">Certificate of Completion</div></div><div class="mc"><p>A certificate of completion is issued to all participants who complete the programme. This reflects the practical achievement of producing a complete, animated Blender scene from scratch — a meaningful professional development milestone for crew expanding into 3D workflows.</p></div></div></div>
+
+<script>
+    function om(id) {
+        const el = document.getElementById('mo-' + id);
+        if (el) { el.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    }
+    function cm(e, id) {
+        e.stopPropagation();
+        const el = document.getElementById('mo-' + id);
+        if (el) { el.classList.remove('open'); document.body.style.overflow = ''; }
+    }
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.mo').forEach(m => m.classList.remove('open'));
+            document.body.style.overflow = '';
+        }
+    });
+    window.addEventListener('scroll', () => {
+        const i = document.querySelector('.scind');
+        if (i) i.style.opacity = window.scrollY > 80 ? '0' : '.5';
+    });
+    document.addEventListener('mousemove', e => {
+        const x = (e.clientX / window.innerWidth - .5) * 14;
+        const y = (e.clientY / window.innerHeight - .5) * 14;
+        document.querySelectorAll('.ao').forEach((o, i) => {
+            const s = (i + 1) * .35;
+            o.style.transform = `translate(${x*s}px,${y*s}px)`;
+        });
+    });
+    // Logo fallback
+    document.querySelectorAll('.lbox img').forEach(img => {
+        img.addEventListener('error', function() {
+            this.style.display = 'none';
+            const fb = this.nextElementSibling;
+            if (fb && fb.classList.contains('ltext')) fb.style.display = 'block';
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lighthouse Studios × 4E Virtual Design</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:    #06060a;
+            --gold:  #F0A820;
+            --gold-s:rgba(240,168,32,0.10);
+            --gold-e:rgba(240,168,32,0.25);
+            --text:  #EAE5DC;
+            --sub:   #6C685F;
+            --faint: rgba(255,255,255,0.04);
+            --fb:    rgba(255,255,255,0.08);
+        }
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html, body { height:100%; }
+        body {
+            font-family:'DM Sans', sans-serif;
+            background:var(--bg); color:var(--text);
+            display:flex; align-items:center; justify-content:center;
+            min-height:100vh; overflow:hidden;
+        }
+
+        /* Atmosphere */
+        .ao {
+            position:fixed; border-radius:50%; filter:blur(110px);
+            pointer-events:none; z-index:0;
+        }
+        .ao1 {
+            width:60vw; height:60vw; top:-20%; left:-15%;
+            background:radial-gradient(circle,rgba(240,168,32,.06),transparent 65%);
+            animation:adrift 22s ease-in-out infinite;
+        }
+        .ao2 {
+            width:50vw; height:50vw; bottom:-15%; right:-10%;
+            background:radial-gradient(circle,rgba(48,160,220,.05),transparent 65%);
+            animation:adrift 30s ease-in-out infinite reverse;
+        }
+        @keyframes adrift {
+            0%,100%{transform:translate(0,0) scale(1)}
+            40%{transform:translate(30px,-25px) scale(1.07)}
+            70%{transform:translate(-20px,28px) scale(.95)}
+        }
+        .grain {
+            position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.02;
+            background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size:180px;
+        }
+
+        /* Card */
+        .card {
+            position:relative; z-index:1;
+            background:var(--faint); border:1px solid var(--fb);
+            border-radius:24px; backdrop-filter:blur(16px);
+            padding:60px 56px 52px;
+            width:100%; max-width:480px;
+            text-align:center;
+            box-shadow:0 32px 80px rgba(0,0,0,.5);
+            animation:cardup .6s cubic-bezier(.22,1,.36,1) both;
+        }
+        @keyframes cardup {
+            from{opacity:0;transform:translateY(32px) scale(.97)}
+            to{opacity:1;transform:none}
+        }
+        .card::before {
+            content:''; position:absolute; top:0; left:0; right:0; height:2px;
+            background:linear-gradient(90deg,transparent 0%,var(--gold) 25%,rgba(224,64,104,.8) 50%,rgba(48,200,160,.8) 75%,transparent 100%);
+            border-radius:24px 24px 0 0;
+        }
+
+        /* Logos */
+        .logos {
+            display:flex; align-items:center; justify-content:center;
+            gap:16px; margin-bottom:44px;
+        }
+        .lbox {
+            background:var(--gold-s); border:1px solid var(--gold-e);
+            border-radius:12px; padding:12px 18px;
+            display:flex; align-items:center; justify-content:center;
+            transition:background .3s;
+        }
+        .lbox:hover { background:rgba(240,168,32,.18); }
+        .lbox img {
+            height:38px; width:auto; max-width:120px; object-fit:contain;
+        }
+        .lbox .ltext {
+            font-family:'Syne',sans-serif; font-weight:800;
+            font-size:.9em; color:var(--gold); display:none;
+        }
+        .lsep {
+            display:flex; align-items:center; justify-content:center;
+            color:var(--sub); font-size:.9em;
+        }
+
+        /* Heading */
+        .eyebrow {
+            font-family:'Syne',sans-serif; font-weight:700; font-size:.66em;
+            letter-spacing:3px; text-transform:uppercase; color:var(--sub);
+            margin-bottom:12px;
+        }
+        h1 {
+            font-family:'DM Serif Display', serif; font-weight:400;
+            font-size:2.1em; line-height:1.1; margin-bottom:10px; color:var(--text);
+        }
+        h1 em { font-style:italic; color:var(--gold); }
+        .desc {
+            font-size:.88em; color:var(--sub); line-height:1.7;
+            margin-bottom:36px; max-width:340px; margin-left:auto; margin-right:auto;
+        }
+
+        /* Password form */
+        .form { display:flex; flex-direction:column; gap:12px; }
+
+        .input-wrap {
+            position:relative;
+        }
+        input[type="password"] {
+            width:100%; padding:14px 48px 14px 18px;
+            background:rgba(255,255,255,.05);
+            border:1px solid rgba(255,255,255,.1);
+            border-radius:12px;
+            color:var(--text); font-family:'DM Sans',sans-serif; font-size:1em;
+            outline:none; transition:all .25s;
+            letter-spacing:3px;
+        }
+        input[type="password"]::placeholder { letter-spacing:1px; color:var(--sub); }
+        input[type="password"]:focus {
+            border-color:var(--gold-e);
+            background:rgba(240,168,32,.06);
+            box-shadow:0 0 0 3px rgba(240,168,32,.08);
+        }
+        input[type="password"].shake {
+            animation:shake .4s ease;
+            border-color:rgba(224,64,104,.6);
+            background:rgba(224,64,104,.06);
+        }
+        @keyframes shake {
+            0%,100%{transform:translateX(0)}
+            20%{transform:translateX(-8px)}
+            40%{transform:translateX(8px)}
+            60%{transform:translateX(-5px)}
+            80%{transform:translateX(5px)}
+        }
+
+        .toggle-vis {
+            position:absolute; right:14px; top:50%; transform:translateY(-50%);
+            background:none; border:none; cursor:pointer;
+            color:var(--sub); font-size:1em; padding:4px;
+            transition:color .2s;
+        }
+        .toggle-vis:hover { color:var(--text); }
+
+        button[type="submit"] {
+            width:100%; padding:14px;
+            background:var(--gold); border:none; border-radius:12px;
+            color:var(--bg); font-family:'Syne',sans-serif; font-weight:700;
+            font-size:.9em; letter-spacing:1px; cursor:pointer;
+            transition:all .25s;
+        }
+        button[type="submit"]:hover {
+            background:#ffbe40;
+            transform:translateY(-2px);
+            box-shadow:0 8px 24px rgba(240,168,32,.3);
+        }
+        button[type="submit"]:active { transform:translateY(0); }
+
+        .error-msg {
+            font-size:.78em; color:#e04068;
+            font-family:'Syne',sans-serif; font-weight:600;
+            min-height:1.2em; opacity:0; transition:opacity .2s;
+        }
+        .error-msg.show { opacity:1; }
+
+        /* Footer note */
+        .foot-note {
+            margin-top:32px; padding-top:24px;
+            border-top:1px solid rgba(255,255,255,.06);
+            font-size:.74em; color:var(--sub); line-height:1.6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="ao ao1"></div>
+<div class="ao ao2"></div>
+<div class="grain"></div>
+
+<div class="card">
+    <div class="logos">
+        <div class="lbox">
+            <img src="LHS.png" alt="Lighthouse Studios"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+            <span class="ltext">Lighthouse Studios</span>
+        </div>
+        <div class="lsep">×</div>
+        <div class="lbox">
+            <img src="4e.png" alt="4E Virtual Design"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+            <span class="ltext">4E Virtual Design</span>
+        </div>
+    </div>
+
+    <div class="eyebrow">Training Proposal · 2026</div>
+    <h1>Blender for<br><em>Animation Production</em></h1>
+    <p class="desc">A training programme proposal prepared exclusively for Lighthouse Studios. Enter your access code to view.</p>
+
+    <form class="form" onsubmit="unlock(event)">
+        <div class="input-wrap">
+            <input type="password" id="pw" placeholder="Access code" autocomplete="off" autofocus>
+            <button type="button" class="toggle-vis" onclick="toggleVis()" title="Show/hide">👁</button>
+        </div>
+        <div class="error-msg" id="err">Incorrect access code — please try again.</div>
+        <button type="submit">View Proposal →</button>
+    </form>
+
+    <div class="foot-note">
+        This proposal is confidential and prepared for Lighthouse Studios.
+    </div>
+</div>
+
+<script>
+    const HASH = '0f513ee619dc567fce7d6cde782d2d0be89b068c02d01f17950b6faef8f1711f';
+
+    async function sha256(str) {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+
+    async function unlock(e) {
+        e.preventDefault();
+        const val = document.getElementById('pw').value;
+        const input = document.getElementById('pw');
+        const err   = document.getElementById('err');
+
+        const h = await sha256(val);
+
+        if (h === HASH) {
+            sessionStorage.setItem('lhs_auth', HASH);
+            input.style.borderColor = 'rgba(48,200,160,.6)';
+            input.style.background  = 'rgba(48,200,160,.06)';
+            setTimeout(() => { window.location.href = 'proposal.html'; }, 300);
+        } else {
+            input.classList.remove('shake');
+            void input.offsetWidth; // reflow to re-trigger
+            input.classList.add('shake');
+            err.classList.add('show');
+            input.value = '';
+            input.focus();
+            setTimeout(() => { input.classList.remove('shake'); }, 400);
+        }
+    }
+
+    function toggleVis() {
+        const input = document.getElementById('pw');
+        input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    // Parallax on orbs
+    document.addEventListener('mousemove', e => {
+        const x = (e.clientX / window.innerWidth - .5) * 20;
+        const y = (e.clientY / window.innerHeight - .5) * 20;
+        document.querySelectorAll('.ao').forEach((o, i) => {
+            const s = (i + 1) * .4;
+            o.style.transform = `translate(${x*s}px,${y*s}px)`;
+        });
+    });
+
+    // If already authenticated, skip landing
+    if (sessionStorage.getItem('lhs_auth') === HASH) {
+        window.location.href = 'proposal.html';
+    }
+</script>
+</body>
+</html>
